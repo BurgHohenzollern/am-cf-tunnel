@@ -1,0 +1,37 @@
+name: Upstream Sync
+
+on:
+  schedule:
+    # 每 7 天左右同步一次
+    # 实际运行时间为每月 1、8、15、22、29 日 UTC 0 点
+    # 北京时间是当天早上 8 点
+    - cron: '0 0 */7 * *'
+  workflow_dispatch: # 支持在 Actions 页面手动触发
+
+permissions:
+  contents: write
+
+jobs:
+  sync_latest_from_upstream:
+    runs-on: ubuntu-latest
+    name: Sync latest commits from upstream repo
+    if: ${{ github.event.repository.fork }}
+    steps:
+      - name: Checkout target repo
+        uses: actions/checkout@v4
+
+      - name: Sync upstream changes
+        id: sync
+        uses: aormsby/Fork-Sync-With-Upstream-action@v3.4
+        with:
+          # 上游仓库，已经填好，不用改
+          upstream_sync_repo: 'amclubs/am-cf-tunnel'
+
+          # 上游仓库的分支，需要你确认
+          upstream_sync_branch: 'main'
+
+          # 你自己的 fork 仓库要同步的分支，需要你确认
+          target_sync_branch: 'main'
+
+          # GitHub 自动提供，不用改
+          target_repo_token: ${{ secrets.GITHUB_TOKEN }}
